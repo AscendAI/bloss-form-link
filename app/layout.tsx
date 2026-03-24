@@ -3,11 +3,12 @@ import { Open_Sans, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
 const openSans = Open_Sans({
   variable: "--font-open-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "700", "800"],
+  style: "normal",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", openSans.variable, "font-sans", geist.variable)}
+      className={cn("h-full", openSans.className, "dark")}
     >
       <body className="min-h-full flex flex-col bg-black">{children}</body>
     </html>
