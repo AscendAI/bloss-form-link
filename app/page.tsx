@@ -12,7 +12,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true }, [
-    AutoScroll({ playOnInit: true, stopOnInteraction: false, speed: 1.5 })
+    AutoScroll({ playOnInit: true, stopOnInteraction: false, speed: 0.5 })
   ]);
 
   useEffect(() => {
@@ -52,26 +52,28 @@ export default function Home() {
         Hanna, Angela and Savera are three of the strongest UGC coaches in <br className="hidden md:block" />
         the industry. Fill out the form below to get started.
       </p>
+      
+      
 
-      {/* Dynamic Video Gallery Section */}
+      {/* Results Label */}
+      <div className="flex flex-col items-center gap-8 w-full z-10">
+        <p className="text-[15px] font-bold uppercase tracking-widest text-[#71717a]">
+          CHECK OUT THE RESULTS
+        </p>
+        {/* Dynamic Video Gallery Section */}
       {isClient && videos.length > 0 ? (
         <div className="w-full max-w-6xl z-10 mb-16 px-4">
           <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4 md:gap-6">
+            <div className="flex">
               {videos.map((video: any) => (
-                <div key={video.public_id} className="flex-[0_0_80%] sm:flex-[0_0_50%] lg:flex-[0_0_33.33%] rounded-2xl overflow-hidden border border-white/10 shadow-2xl aspect-[9/16] bg-zinc-900">
-                  <CldVideoPlayer
-                    width="1080"
-                    height="1920"
-                    src={video.public_id}
-                    colors={{
-                      accent: "#A352EF",
-                      base: "#000000",
-                      text: "#FFFFFF",
-                    }}
-                    autoPlay="on-scroll"
-                    muted={true}
-                    loop={true}
+                <div key={video.public_id} className="flex-[0_0_220px] w-[220px] h-[390px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 mr-4 md:mr-6 relative">
+                  <video
+                    src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/q_auto,f_auto/${video.public_id}.mp4`}
+                    className="w-full h-full object-cover pointer-events-none"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
                   />
                 </div>
               ))}
@@ -79,44 +81,26 @@ export default function Home() {
           </div>
         </div>
       ) : isClient ? (
-        /* Fallback Sample Video if no videos found or keys not provided */
-        <div className="w-full max-w-md z-10 mb-16 px-4">
-          <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl aspect-[9/16] bg-zinc-900 mx-auto">
-            <CldVideoPlayer
-              width="1080"
-              height="1920"
-              src="/file.mp4"
-              colors={{
-                accent: "#A352EF",
-                base: "#000000",
-                text: "#FFFFFF",
-              }}
-              fontFace="Open Sans"
-              autoPlay="on-scroll"
-              muted={true}
-              loop={true}
-            />
+        /* Loading Skeletons if no videos found or while loading */
+        <div className="w-full max-w-6xl z-10 mb-16 px-4">
+          <div className="overflow-hidden">
+            <div className="flex justify-center">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex-[0_0_220px] w-[220px] h-[390px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 animate-pulse relative mr-4 md:mr-6">
+                  <div className="absolute inset-0 bg-gradient-to-b from-zinc-800/20 to-zinc-950/50"></div>
+                  <div className="absolute flex flex-col items-center justify-center w-full h-full text-zinc-700">
+                    <svg className="w-12 h-12 mb-4 animate-pulse opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="mt-4 text-xs text-zinc-500 italic">Add CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to .env.local to see your own videos.</p>
+          <p className="mt-8 text-[13px] text-zinc-500 italic text-center">Add CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to .env.local to see your own videos.</p>
         </div>
       ) : null}
-
-      {/* Results Label */}
-      <div className="flex flex-col items-center gap-8 w-full z-10">
-        <p className="text-[15px] font-bold uppercase tracking-widest text-[#71717a]">
-          CHECK OUT THE RESULTS
-        </p>
-        
-        <div className="w-full max-w-2xl rounded-2xl overflow-hidden border border-white/5 shadow-2xl mb-16">
-          <CldImage 
-            src="results" 
-            alt="UGC Results Analytics" 
-            width={800} 
-            height={400} 
-            className="w-full h-auto"
-            priority
-          />
-        </div>
       </div>
 
       {/* Form Section */}
