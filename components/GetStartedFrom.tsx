@@ -1,191 +1,339 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
-  User, 
-  Phone, 
-  Mail, 
-  Star, 
-  Target, 
-  Search, 
-  ArrowRight
+  User,
+  Phone,
+  Mail,
+  Target,
+  CheckCircle2,
+  ArrowRight,
+  Loader2,
+  Search,
 } from "lucide-react";
-import { z } from "zod";
-import { FaInstagram } from "react-icons/fa";
+import { SiDiscord, SiInstagram } from "react-icons/si";
+import { motion, AnimatePresence } from "framer-motion";
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   phone: z.string().min(1, "Phone number is required"),
   email: z.string().email("Invalid email address"),
-  instagram: z.string().url("Invalid Instagram URL"),
+  instagram: z.string().min(1, "Instagram profile is required"),
   goals: z.string().min(1, "Goals are required"),
-  findUs: z.string().min(1, "This field is required"),
+  referrer: z.string().min(1, "This field is required"),
 });
 
+type InsertSubmission = z.infer<typeof formSchema>;
+
+const DISCORD_LINK = "https://discord.gg/XzTDKvBHqp";
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1459938604276121839/uzIe6XeiCCWJHCFl6FuQlJnaOl9Ps3ltsV_TsoMFOuB-yKgcnFaqgs46AmwvYIK-r69Y";
+
 export default function GetStartedFrom() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    instagram: "",
-    goals: "",
-    findUs: "",
+  const [submitted, setSubmitted] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const form = useForm<InsertSubmission>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: "",
+      phone: "",
+      email: "",
+      instagram: "",
+      goals: "",
+      referrer: "",
+    },
   });
 
-  const [errors, setErrors] = useState<z.ZodError | null>(null);
+  const onSubmit = async (data: InsertSubmission) => {
+    setIsPending(true);
+    setErrorMsg("");
+    
+    const payload = {
+      embeds: [
+        {
+          title: "New Form Submission",
+          color: 0x8E31E3,
+          fields: [
+            { name: "Full Name", value: data.fullName, inline: true },
+            { name: "Phone", value: data.phone, inline: true },
+            { name: "Email", value: data.email, inline: true },
+            { name: "Instagram", value: data.instagram, inline: true },
+            { name: "Goals", value: data.goals },
+            { name: "Referrer", value: data.referrer },
+          ],
+          timestamp: new Date().toISOString(),
+        }
+      ]
+    };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const result = formSchema.safeParse(formData);
-    if (!result.success) {
-      setErrors(result.error);
-    } else {
-      setErrors(null);
-      // Handle successful form submission
-      console.log("Form submitted successfully:", result.data);
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        throw new Error("Failed to submit form");
+      }
+      setSubmitted(true);
+    } catch (error: any) {
+      setErrorMsg(error.message || "Failed to submit properly. Please try again.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center my-10 mx-5">
-      <Card className="sm:max-w-[480px] w-full sm:px-4 px-2 pb-6">
-        <CardHeader className="text-center py-4 sm:px-10 px-2">
-          <CardTitle className="text-2xl font-bold">Get Started Today</CardTitle>
-          <CardDescription className="text-sm">
-            Fill in your details and unlock access to our exclusive community.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="grid w-full items-center gap-5">
-              <div className="flex flex-col space-y-3">
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input
-                    id="fullName"
+    <div className="w-full max-w-lg mx-auto my-10 px-5">
+      <AnimatePresence mode="wait">
+        {!submitted ? (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 backdrop-blur-sm p-6 sm:p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold mb-1">Get Started Today</h2>
+                <p className="text-zinc-400 text-sm">
+                  Fill in your details and unlock access to our exclusive community.
+                </p>
+                {errorMsg && (
+                  <p className="text-red-500 mt-2 text-sm">{errorMsg}</p>
+                )}
+              </div>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-left">
+                  <FormField
+                    control={form.control}
                     name="fullName"
-                    placeholder="John Doe"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="pl-10"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">Full Name</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Input
+                              placeholder="John Doe"
+                              className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "fullName") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "fullName")?.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col space-y-4">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input
-                    id="phone"
+
+                  <FormField
+                    control={form.control}
                     name="phone"
-                    placeholder="+1 (555) 123-4567"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="pl-10"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">Phone Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Input
+                              placeholder="+1 (555) 123-4567"
+                              className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "phone") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "phone")?.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col space-y-4">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input
-                    id="email"
+
+                  <FormField
+                    control={form.control}
                     name="email"
-                    placeholder="john@example.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">Email Address</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Input
+                              placeholder="john@example.com"
+                              type="email"
+                              className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "email") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "email")?.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col space-y-4">
-                <Label htmlFor="instagram">Instagram Profile</Label>
-                <div className="relative">
-                  <FaInstagram className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input
-                    id="instagram"
+
+                  <FormField
+                    control={form.control}
                     name="instagram"
-                    placeholder="https://instagram.com/yourprofile"
-                    value={formData.instagram}
-                    onChange={handleInputChange}
-                    className="pl-10"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">Instagram Profile</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <SiInstagram className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Input
+                              placeholder="https://instagram.com/yourprofile"
+                              className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "instagram") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "instagram")?.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col space-y-4">
-                <Label htmlFor="goals">Your Goals</Label>
-                <div className="relative">
-                  <Target className="absolute left-3 top-3 w-4 h-4 text-white/40" />
-                  <Textarea
-                    id="goals"
+
+                  <FormField
+                    control={form.control}
                     name="goals"
-                    placeholder="Tell us about your goals and what you hope to achieve..."
-                    value={formData.goals}
-                    onChange={handleInputChange}
-                    className="px-10 h-28"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">Your Goals</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Target className="absolute left-3 top-3 w-4 h-4 text-zinc-500" />
+                            <Textarea
+                              placeholder="Tell us about your goals and what you hope to achieve..."
+                              className="pl-10 min-h-[100px] resize-none bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "goals") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "goals")?.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col space-y-3">
-                <Label htmlFor="findUs">How Did You Find Us?</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input
-                    id="findUs"
-                    name="findUs"
-                    placeholder="e.g. Instagram, TikTok, a friend, Google..."
-                    value={formData.findUs}
-                    onChange={handleInputChange}
-                    className="pl-10"
+
+                  <FormField
+                    control={form.control}
+                    name="referrer"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-300">How Did You Find Us?</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <Input
+                              placeholder="e.g. Instagram, TikTok, a friend, Google..."
+                              className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-purple-500/20"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {errors?.issues.find((err) => err.path[0] === "findUs") && (
-                  <p className="text-red-500 text-sm">{errors.issues.find((err) => err.path[0] === "findUs")?.message}</p>
-                )}
-              </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold p-10 text-base rounded-xl"
+                    size="lg"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit & Unlock Discord
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
             </div>
-            <CardFooter className="flex justify-center">
-              <Button type="submit" className="w-full text-base font-semibold p-10 bg-gradient-to-r rounded-xl from-[#8E31E3] to-[#A352EF] text-white">
-                Submit & Unlock Discord
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </CardFooter>
-          </form>
-        </CardContent>
-      </Card>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          >
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 backdrop-blur-sm p-8 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 12, delay: 0.2 }}
+                className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 mb-6"
+              >
+                <CheckCircle2 className="w-10 h-10 text-green-400" />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h2 className="text-2xl font-bold mb-2">You're In!</h2>
+                <p className="text-zinc-400 mb-8 max-w-sm mx-auto">
+                  Your information has been submitted successfully. Click below to join our exclusive Discord community.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <a
+                  href={DISCORD_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="lg"
+                    className="gap-2 text-base px-8 bg-[#5865F2] text-white rounded-xl py-6 font-semibold hover:bg-[#4752C4]"
+                  >
+                    <SiDiscord className="w-5 h-5" />
+                    Join Discord Server
+                  </Button>
+                </a>
+
+                <p className="text-xs text-zinc-500 mt-4">
+                  Link not working?{" "}
+                  <a
+                    href={DISCORD_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 text-zinc-400 hover:text-white"
+                  >
+                    Click here
+                  </a>
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
