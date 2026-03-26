@@ -40,7 +40,6 @@ const formSchema = z.object({
 type InsertSubmission = z.infer<typeof formSchema>;
 
 const DISCORD_LINK = "https://discord.gg/XzTDKvBHqp";
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1459938604276121839/uzIe6XeiCCWJHCFl6FuQlJnaOl9Ps3ltsV_TsoMFOuB-yKgcnFaqgs46AmwvYIK-r69Y";
 
 export default function GetStartedFrom() {
   const [submitted, setSubmitted] = useState(false);
@@ -62,30 +61,12 @@ export default function GetStartedFrom() {
   const onSubmit = async (data: InsertSubmission) => {
     setIsPending(true);
     setErrorMsg("");
-    
-    const payload = {
-      embeds: [
-        {
-          title: "New Form Submission",
-          color: 0x8E31E3,
-          fields: [
-            { name: "Full Name", value: data.fullName, inline: true },
-            { name: "Phone", value: data.phone, inline: true },
-            { name: "Email", value: data.email, inline: true },
-            { name: "Instagram", value: data.instagram, inline: true },
-            { name: "Goals", value: data.goals },
-            { name: "Referrer", value: data.referrer },
-          ],
-          timestamp: new Date().toISOString(),
-        }
-      ]
-    };
 
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ ...data, source: "home" })
       });
       if (!res.ok) {
         throw new Error("Failed to submit form");

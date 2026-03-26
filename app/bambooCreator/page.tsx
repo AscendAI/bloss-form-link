@@ -41,7 +41,6 @@ const insertSubmissionSchema = z.object({
 type InsertSubmission = z.infer<typeof insertSubmissionSchema>;
 
 const DISCORD_LINK = "https://discord.gg/HKUWMzQePy";
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1459938604276121839/uzIe6XeiCCWJHCFl6FuQlJnaOl9Ps3ltsV_TsoMFOuB-yKgcnFaqgs46AmwvYIK-r69Y";
 
 
 function ReelCarousel({ videos = [], isLoading = true }: { videos?: any[], isLoading?: boolean }) {
@@ -225,30 +224,11 @@ export default function BambooCreator() {
 
   const onSubmit = async (data: InsertSubmission) => {
     setIsPending(true);
-    
-    const payload = {
-      embeds: [
-        {
-          title: "New Bamboo Creator Submission",
-          color: 0x10b981,
-          fields: [
-            { name: "Full Name", value: data.fullName, inline: true },
-            { name: "Phone", value: data.phone, inline: true },
-            { name: "Email", value: data.email, inline: true },
-            { name: "Instagram", value: data.instagram, inline: true },
-            { name: "Goals", value: data.goals },
-            { name: "Referrer", value: data.referrer },
-          ],
-          timestamp: new Date().toISOString(),
-        }
-      ]
-    };
-
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ ...data, source: "bamboocreator" }),
       });
       if (!res.ok) {
         throw new Error("Failed to submit form");
