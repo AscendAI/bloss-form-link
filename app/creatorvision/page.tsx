@@ -207,8 +207,6 @@ export default function CreatorVision() {
   const [isPending, setIsPending] = useState(false);
   const [videos, setVideos] = useState<any[]>([]);
   const [isVideosLoading, setIsVideosLoading] = useState(true);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
-  const [isTestimonialsLoading, setIsTestimonialsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchVideos() {
@@ -230,26 +228,6 @@ export default function CreatorVision() {
       }
     }
     fetchVideos();
-  }, []);
-
-  useEffect(() => {
-    async function fetchTestimonials() {
-      try {
-        const response = await fetch("/api/images?folder=coach.bloss.app/creatorvision/testimonials");
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const formattedImages = data.map((img: any) => 
-            `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/q_auto,f_auto/${img.public_id}`
-          );
-          setTestimonials(formattedImages);
-        }
-      } catch (error) {
-        console.error("Failed to load testimonials:", error);
-      } finally {
-        setIsTestimonialsLoading(false);
-      }
-    }
-    fetchTestimonials();
   }, []);
 
   const form = useForm<InsertSubmission>({
@@ -631,30 +609,23 @@ export default function CreatorVision() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="w-full max-w-4xl mx-auto px-4 pb-20"
+          data-testid="section-testimonials"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-2" data-testid="text-testimonials-header">
             Real results from our community
           </h2>
           <p className="text-center text-zinc-400 text-sm mb-8">Wins shared directly in our Discord</p>
-          <div className="columns-2 sm:columns-3 gap-3 space-y-3 pb-8">
-            {isTestimonialsLoading ? (
-              [1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="break-inside-avoid">
-                  <div className={`w-full rounded-lg bg-zinc-900 border border-zinc-800 animate-pulse ${i % 2 === 0 ? 'h-[250px]' : 'h-[320px]'}`} />
-                </div>
-              ))
-            ) : testimonials.length > 0 ? (
-              testimonials.map((src, index) => (
-                <div key={index} className="break-inside-avoid">
-                  <img
-                    src={src}
-                    alt={`Community win ${index + 1}`}
-                    className="w-full rounded-lg"
-                    loading="lazy"
-                  />
-                </div>
-              ))
-            ) : null}
+          <div className="columns-2 sm:columns-3 gap-3 space-y-3">
+            {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map((n) => (
+              <div key={n} className="break-inside-avoid" data-testid={`img-testimonial-${n}`}>
+                <img
+                  src={`/creatorvision/testimonials/image${n}.jpg`}
+                  alt={`Community win ${n}`}
+                  className="w-full rounded-lg"
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
         </motion.section>
 
