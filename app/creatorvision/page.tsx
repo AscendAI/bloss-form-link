@@ -138,6 +138,7 @@ function ReelCarousel({ videos = [], isLoading = true }: { videos?: any[], isLoa
   const scroll = (direction: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
+    el.dispatchEvent(new Event("pointerdown"));
     const amount = 300;
     el.scrollBy({
       left: direction === "left" ? -amount : amount,
@@ -490,7 +491,7 @@ export default function CreatorVision() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold p-10 text-base rounded-xl"
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold p-10 md:text-base text-sm rounded-xl"
                         size="lg"
                         disabled={isPending}
                       >

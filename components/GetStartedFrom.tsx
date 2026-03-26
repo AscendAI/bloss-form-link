@@ -232,7 +232,7 @@ export default function GetStartedFrom() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold p-10 text-base rounded-xl"
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold p-10 md:text-base text-sm rounded-xl"
                     size="lg"
                     disabled={isPending}
                   >

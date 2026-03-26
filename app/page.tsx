@@ -6,16 +6,39 @@ import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoScroll from "embla-carousel-auto-scroll";
 import { motion } from "framer-motion";
-import { Eye } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback } from "react";
 
 export default function Home() {
   const [videos, setVideos] = useState<any[]>([]);
 
   const [isClient, setIsClient] = useState(false);
 
-  const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true }, [
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: true }, [
     AutoScroll({ playOnInit: true, stopOnInteraction: false, speed: 0.5 })
   ]);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) {
+      const autoScroll = emblaApi.plugins().autoScroll;
+      if (autoScroll) autoScroll.stop();
+      emblaApi.scrollPrev();
+      setTimeout(() => {
+        if (autoScroll) autoScroll.play();
+      }, 5000);
+    }
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) {
+      const autoScroll = emblaApi.plugins().autoScroll;
+      if (autoScroll) autoScroll.stop();
+      emblaApi.scrollNext();
+      setTimeout(() => {
+        if (autoScroll) autoScroll.play();
+      }, 5000);
+    }
+  }, [emblaApi]);
 
   useEffect(() => {
     setIsClient(true);
@@ -23,7 +46,49 @@ export default function Home() {
       try {
         const response = await fetch("/api/videos?folder=coach.bloss.app/videos");
         const data = await response.json();
-        setVideos(data);
+        
+        const VIEWS_MAP: Record<string, string> = {
+          "reel4": "20.9M",
+          "reel11": "16.1M",
+          "reel10": "15M",
+          "reel9": "8M",
+          "reel1": "7.1M",
+          "reel12": "5.6M",
+          "reel7": "4.3M",
+          "reel13": "3.4M",
+          "reel8": "2.6M",
+          "reel2": "2.3M",
+          "reel6": "1.3M",
+          "reel5": "1.2M",
+          "reel3": "379K"
+        };
+        const ORDER = ["reel4", "reel11", "reel10", "reel9", "reel1", "reel12", "reel7", "reel13", "reel8", "reel2", "reel6", "reel5", "reel3"];
+
+        if (data && data.length > 0) {
+          let formattedVideos = data.map((vid: any) => {
+            const rawName = vid.public_id.split('/').pop() || "";
+            const filename = rawName.split('_')[0];
+            return {
+              ...vid,
+              filename,
+              views: VIEWS_MAP[filename] || "15M"
+            };
+          });
+
+          // Sort exactly like the original home.tsx array
+          formattedVideos.sort((a: any, b: any) => {
+            const idxA = ORDER.indexOf(a.filename);
+            const idxB = ORDER.indexOf(b.filename);
+            if (idxA === -1 && idxB === -1) return 0;
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxA - idxB;
+          });
+
+          setVideos(formattedVideos);
+        } else {
+          setVideos([]);
+        }
       } catch (error) {
         console.error("Failed to load videos:", error);
       }
@@ -82,7 +147,20 @@ export default function Home() {
         </p>
         {/* Dynamic Video Gallery Section */}
       {isClient && videos.length > 0 ? (
-        <div className="w-full max-w-6xl z-10 mb-16 md:px-4">
+        <div className="w-full max-w-6xl z-10 mb-16 px-4 relative group">
+          <button
+            onClick={scrollPrev}
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 text-white rounded-full p-2 backdrop-blur-sm transition-opacity opacity-0 group-hover:opacity-100"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={scrollNext}
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/60 text-white rounded-full p-2 backdrop-blur-sm transition-opacity opacity-0 group-hover:opacity-100"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex md:-ml-4">
               {videos.map((video: any) => (
@@ -100,7 +178,7 @@ export default function Home() {
                     {/* Badge */}
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1 border-none shadow-none z-10">
                       <Eye className="w-3.5 h-3.5 text-white/90" />
-                      <span className="text-white/90 text-xs font-semibold">15M</span>
+                      <span className="text-white/90 text-xs font-semibold">{video.views}</span>
                     </div>
                   </div>
                 </div>

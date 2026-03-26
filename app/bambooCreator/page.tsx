@@ -26,7 +26,10 @@ import {
   Loader2,
   Search,
   Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { useCallback } from "react";
 import { SiDiscord, SiInstagram } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -70,12 +73,21 @@ function ReelCarousel({ videos = [], isLoading = true }: { videos?: any[], isLoa
 
   const INFINITE_VIDEOS = videos.length > 0 ? [...videos, ...videos] : [];
 
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollPos = useRef(0);
   const animationId = useRef<number | undefined>(undefined);
   const isUserScrolling = useRef(false);
   const restartTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+  }, []);
 
   const getHalfWidth = () => {
     const el = scrollRef.current;
@@ -135,6 +147,8 @@ function ReelCarousel({ videos = [], isLoading = true }: { videos?: any[], isLoa
     el.addEventListener("pointerdown", onInteractionStart);
     el.addEventListener("wheel", onInteractionStart, { passive: true });
     el.addEventListener("touchstart", onInteractionStart, { passive: true });
+    el.addEventListener("scroll", updateScrollButtons, { passive: true });
+    updateScrollButtons();
 
     return () => {
       clearTimeout(startDelay);
@@ -144,14 +158,45 @@ function ReelCarousel({ videos = [], isLoading = true }: { videos?: any[], isLoa
       el.removeEventListener("pointerdown", onInteractionStart);
       el.removeEventListener("wheel", onInteractionStart);
       el.removeEventListener("touchstart", onInteractionStart);
+      el.removeEventListener("scroll", updateScrollButtons);
     };
-  }, []);
+  }, [updateScrollButtons]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.dispatchEvent(new Event("pointerdown"));
+    const amount = 300;
+    el.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll("left")}
+          aria-label="Scroll reels left"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white rounded-full p-2 backdrop-blur-sm transition-opacity opacity-0 group-hover:opacity-100"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+      )}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll("right")}
+          aria-label="Scroll reels right"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white rounded-full p-2 backdrop-blur-sm transition-opacity opacity-0 group-hover:opacity-100"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      )}
+
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 px-4"
+        className="flex gap-4 overflow-x-auto pb-4 px-4 hide-scrollbar"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {INFINITE_VIDEOS.map((video, index) => (
@@ -527,7 +572,7 @@ export default function BambooCreator() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-emerald-600 to-green-500 text-white font-semibold p-10 text-base rounded-xl"
+                        className="w-full bg-gradient-to-r from-emerald-600 to-green-500 text-white font-semibold p-10 md:text-base text-sm rounded-xl"
                         size="lg"
                         disabled={isPending}
                         data-testid="button-submit"
