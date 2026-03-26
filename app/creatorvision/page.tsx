@@ -211,12 +211,12 @@ export default function CreatorVision() {
   useEffect(() => {
     async function fetchVideos() {
       try {
-        const response = await fetch("/api/videos?folder=coach.bloss.app/creatorvision");
+        const response = await fetch("/api/videos?folder=coach-bloss/creatorvision");
         const data = await response.json();
         const viewsList = ["123K", "214K", "859.1K", "397K", "111K", "2.8M", "1.1M", "3.6M", "1.9M", "3.3M"];
         if (data && data.length > 0) {
           const formattedVideos = data.map((vid: any, idx: number) => ({
-            src: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/q_auto,f_auto/${vid.public_id}.mp4`,
+            src: vid.src,
             views: viewsList[idx % viewsList.length]
           }));
           setVideos(formattedVideos);

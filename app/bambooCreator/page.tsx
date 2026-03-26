@@ -236,12 +236,12 @@ export default function BambooCreator() {
   useEffect(() => {
     async function fetchVideos() {
       try {
-        const response = await fetch("/api/videos?folder=coach.bloss.app/bamboocreator");
+        const response = await fetch("/api/videos?folder=coach-bloss/bamboocreator");
         const data = await response.json();
         const viewsList = ["53.3M", "2.9M", "294.5K", "787K", "297K", "927.6K", "1.7M"];
         if (data && data.length > 0) {
           const formattedVideos = data.map((vid: any, idx: number) => ({
-            src: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/q_auto,f_auto/${vid.public_id}.mp4`,
+            src: vid.src,
             views: viewsList[idx % viewsList.length]
           }));
           setVideos(formattedVideos);

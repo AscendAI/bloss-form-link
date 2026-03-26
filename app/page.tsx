@@ -1,7 +1,6 @@
 "use client";
 import GetStartedFrom from "@/components/GetStartedFrom";
-import { CldImage, CldVideoPlayer } from "next-cloudinary";
-import "next-cloudinary/dist/cld-video-player.css";
+
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import AutoScroll from "embla-carousel-auto-scroll";
@@ -44,7 +43,7 @@ export default function Home() {
     setIsClient(true);
     async function fetchVideos() {
       try {
-        const response = await fetch("/api/videos?folder=coach.bloss.app/videos");
+        const response = await fetch("/api/videos?folder=coach-bloss/videos");
         const data = await response.json();
         
         const VIEWS_MAP: Record<string, string> = {
@@ -66,8 +65,8 @@ export default function Home() {
 
         if (data && data.length > 0) {
           let formattedVideos = data.map((vid: any) => {
-            const rawName = vid.public_id.split('/').pop() || "";
-            const filename = rawName.split('_')[0];
+            const rawName = vid.name || "";
+            const filename = rawName.split('.')[0];
             return {
               ...vid,
               filename,
@@ -163,11 +162,11 @@ export default function Home() {
           
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex md:-ml-4">
-              {videos.map((video: any) => (
-                <div key={video.public_id} className="flex-[0_0_auto] pl-4">
+              {videos.map((video: any, index: number) => (
+                <div key={`${video.name}-${index}`} className="flex-[0_0_auto] pl-4">
                   <div className="w-[240px] h-[420px] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 relative snap-center">
                     <video
-                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/q_auto,f_auto/${video.public_id}.mp4`}
+                      src={video.src}
                       className="w-full h-full object-cover pointer-events-none"
                       autoPlay
                       muted
@@ -206,7 +205,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <p className="mt-8 text-[13px] text-zinc-500 italic text-center">Add CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to .env.local to see your own videos.</p>
+          <p className="mt-8 text-[13px] text-zinc-500 italic text-center">Add FIREBASE_API_KEY and FIREBASE_API_SECRET to .env to see your own videos.</p>
         </div>
       ) : null}
       </motion.section>
