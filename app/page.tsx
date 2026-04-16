@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useCallback } from "react";
 
-const DISCORD_LINK = "https://discord.gg/XzTDKvBHqp";
+const DISCORD_LINK = "https://discord.gg/BlossCC";
 
 export default function Home() {
   const [videos, setVideos] = useState<any[]>([]);
