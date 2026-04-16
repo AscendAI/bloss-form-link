@@ -163,6 +163,22 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.6 }}
       >
+        <motion.a
+          href={DISCORD_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          className="group relative inline-flex items-center justify-center rounded-full p-[1px]"
+        >
+          <span className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-400 opacity-35 blur-lg transition-all duration-500 group-hover:opacity-70" />
+          <span className="relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-2.5 text-[13px] font-semibold uppercase tracking-wide text-white shadow-[0_8px_24px_rgba(168,85,247,0.35)] transition-all duration-300 group-hover:from-indigo-400 group-hover:via-violet-400 group-hover:to-fuchsia-400">
+            <Sparkles className="h-3.5 w-3.5" />
+            Join Discord
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </span>
+        </motion.a>
+
         <p className="text-[15px] font-semibold uppercase tracking-widest text-zinc-500 text-center mb-6">
           CHECK OUT THE RESULTS
         </p>
