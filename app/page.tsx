@@ -273,7 +273,7 @@ export default function Home() {
           className="group relative inline-flex items-center justify-center rounded-full p-[1px]"
         >
           <span className="absolute -inset-2 rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-400 opacity-40 blur-xl transition-all duration-500 group-hover:opacity-80" />
-          <span className="relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-9 py-4 text-[15px] font-semibold text-white shado[...]
+          <span className="relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-9 py-4 text-[15px] font-semibold text-white shadow-[0_10px_35px_rgba(168,85,247,0.45)] transition-all duration-300 group-hover:from-indigo-400 group-hover:via-violet-400 group-hover:to-fuchsia-400">
             <Sparkles className="h-4 w-4" />
             Join Discord
             <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
